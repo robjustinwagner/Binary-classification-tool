@@ -2,11 +2,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class provides a framework for accessing a decision tree.
- * Put your code in constructor, printInfoGain(), buildTree and buildPrunedTree()
- * You can add your own help functions or variables in this class 
- */
+
 public class DecisionTree {
 	/**
 	 * training data set, pruning data set and testing data set
@@ -317,21 +313,6 @@ public class DecisionTree {
 		
 	}
 
-	/**
-	 * Prints the tree in specified format. It is recommended, but not
-	 * necessary, that you use the print method of DecTreeNode.
-	 * 
-	 * Example:
-	 * Root {odor?}
-     *     a (e)
-     *     m (e)
-   	 *	   n {habitat?}
-     *         g (e)
-     *  	   l (e)
-     *	   p (p)
-   	 *	   s (e)
-	 *         
-	 */
 	public void print() {
 		root.print(0);
 	}
