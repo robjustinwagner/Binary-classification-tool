@@ -2,29 +2,40 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/* This class models a Decision Tree, with nodes
+ * that are generated with specific attribute
+ * branches--based upon learning from a training
+ * data set. This model is then tuned using a
+ * small partition of the original data set
+ * not included in the original training.
+ *
+ * The accuracy of the resulting Decision Tree
+ * structure can be tested from a small section of
+ * the original data not included in either the
+ * training or tuning processes.
+ *
+ * @author Bob (Robert) Wagner
+ */
 public class DecisionTree {
-	/**
-	 * training data set, pruning data set and testing data set
-	 */
-	private DataSet train = null;		// Training Data Set
-	private DataSet tune = null;		// Tuning Data Set
-	private DataSet test = null;		// Testing Data Set
-	private DecTreeNode root;
+	
+	private DataSet train = null;	// Training Data Set
+	private DataSet tune = null;	// Tuning Data Set
+	private DataSet test = null;	// Testing Data Set
+	private DecTreeNode root = null;// Root node
+	
 	List<DecTreeNode> rtn = new ArrayList<DecTreeNode>();
 
-	/**
-	 * Constructor
+	/* Constructor that initalizes the training, tuning, and testing
+	 * data sets for this Decision Tree instance.
 	 * 
-	 * @param train  
-	 * @param tune
-	 * @param test
+	 * @param train	 the training data set
+	 * @param tune	 the tuning data set
+	 * @param test	 the testing data set
 	 */
-	DecisionTree(DataSet train, DataSet tune, DataSet test) {
-		this.train = train;
-		this.tune = tune;
-		this.test = test;
-		this.root = null;
+	public DecisionTree(DataSet _train, DataSet _tune, DataSet _test) {
+		train = _train;
+		tune = _tune;
+		test = _test;
 	}
 	
 	/**
@@ -35,10 +46,8 @@ public class DecisionTree {
 		//Iterate through training data and tally the number of edible and poisonous labels
 		int eCount = 0, pCount = 0;
 		for(int i = 0; i < this.train.instances.size(); i++) {
-			
-			if(this.train.instances.get(i).label.equals(this.train.labels[0])) { eCount++; } 
-			else { pCount++; }
-			
+			if(this.train.instances.get(i).label.equals(this.train.labels[0])) eCount++;
+			else pCount++;
 		}
 		
 		//Use this number to determine whether we are looking for H(e[dible]) or H(p[oisonous])
@@ -62,12 +71,10 @@ public class DecisionTree {
 		
 		double infoGain;
 		for(int attr = 0; attr < this.train.attr_name.length; attr++) {
-			
 			//Print I(Y;X) = H(Y) - H(Y|X)	
 			infoGain = hY - findhYX(attr, attr, majorityLabel, this.train.instances);
 			System.out.println(this.train.attr_name[attr] + ": info gain = " 
 					+ new BigDecimal(String.valueOf(infoGain)).setScale(3, BigDecimal.ROUND_FLOOR));
-			
 		}
 		
 	}
@@ -86,10 +93,8 @@ public class DecisionTree {
 		//Iterate through training data and tally the number of edible and poisonous labels
 		int eCount = 0, pCount = 0;
 		for(int i = 0; i < examples.size(); i++) {
-			
-			if(examples.get(i).label.equals(this.train.labels[0])) { eCount++; } 
-			else { pCount++; }
-			
+			if(examples.get(i).label.equals(this.train.labels[0])) eCount++; 
+			else pCount++;
 		}
 		
 		//Use this number to determine whether we are looking for H(e[dible]) or H(p[oisonous])
@@ -111,14 +116,18 @@ public class DecisionTree {
 		double hY = -(double) (pMaj)*((double) Math.log(pMaj)/Math.log(2))
 				     -((double) (pMin)*((double) Math.log(pMin)/Math.log(2)));
 		
-		if(examples.isEmpty()) { //Training examples are exhausted
+		if(examples.isEmpty()) {
+			//Training examples are exhausted
 			node.label = majorityLabel;
 			node.terminal = true;
 			return;
 		}
+		// test if all examples have the same label
 		boolean allSame = true;
-		for(int w = 0; (w < examples.size()) && allSame; w++) { // test if all examples have the same label
-			if(!examples.get(w).label.equals(examples.get(0).label)) { allSame = false;	}
+		for(int w = 0; (w < examples.size()) && allSame; w++) {
+			if(!examples.get(w).label.equals(examples.get(0).label)) {
+				allSame = false;
+			}
 		}
 		if(allSame) { //if all examples have the same label
 			node.label = examples.get(0).label;
@@ -171,20 +180,26 @@ public class DecisionTree {
 		}
 			
 		if(allTerminal) {
-			//NEED TO MAKE COPY OF ROOT NODE NOT CURRENT, JUST MODIFY CURRENT
+			
 			node.terminal = true;
 			List<Instance> ins = new ArrayList<Instance>();
 			for(int g = 0; g < this.train.instances.size(); g++) {
 				boolean hasAllAttributes = true;
 				for(int h = 0; h < attributeNum.size(); h++) {
-					if(!this.train.instances.get(g).attributes.get(h).equals(attributeList.get(h))) { hasAllAttributes = false; }
+					if(!this.train.instances.get(g).attributes.get(h).equals(attributeList.get(h))) {
+						hasAllAttributes = false; 
+					}
 				}
-				if(hasAllAttributes) { ins.add(this.train.instances.get(g)); } //if it has all attributes, add it
+				//if it has all attributes, add it
+				if(hasAllAttributes) {
+					ins.add(this.train.instances.get(g)); 
+				}
 			}
+			
 			int eCount = 0, pCount = 0;
 			for(int i = 0; i < ins.size(); i++) {
-				if(ins.get(i).label.equals(this.train.labels[0])) { eCount++; } 
-				else { pCount++; }
+				if(ins.get(i).label.equals(this.train.labels[0])) eCount++;
+				else pCount++;
 			}
 			if(eCount < pCount) {
 				node.label = this.train.labels[1];
@@ -193,11 +208,8 @@ public class DecisionTree {
 			}
 			node.children = null;
 			rtn.add(root);
-			
 		}
-
 		return false;		
-		
 	}
 	
 
@@ -222,35 +234,24 @@ public class DecisionTree {
 			//if more accurate tree exists in pruned set, update bestRoot
 			for(int z = 0; z < rtn.size(); z++) {
 				double thisAccuracy = determineAccuracy(this.tune.instances, classify2(rtn.get(z)));
-			  //TODO: ALLOW DEPTH CHECK (which is working properly) WHEN I GET PRUNED TREES WORKING 
-			  //if(thisAccuracy >= bestAccuracy) {
-			    if(thisAccuracy > bestAccuracy) {
-				/*	if(thisAccuracy == bestAccuracy) {
-						if(getMaxDepth(bestRoot) > getMaxDepth(rtn.get(z))) {
-							bestRoot = rtn.get(z);
-							updatedRoot = true;
-						}
-					} else { */
-						bestAccuracy = thisAccuracy;
-						bestRoot = rtn.get(z);
-						updatedRoot = true;
-				//}
-					
+			    	if(thisAccuracy > bestAccuracy) {
+					bestAccuracy = thisAccuracy;
+					bestRoot = rtn.get(z);
+					updatedRoot = true;
 				}
 			}
 			
 		} while (updatedRoot);
 		
 		root = bestRoot; //finally set best pruned root node to this.root
-		
 	}
 	
 	private int getMaxDepth(DecTreeNode node) {
 		int depth = 0;
-	    for (int a = 0; a < node.children.size(); a++) {
-	    	depth = Math.max(depth, getMaxDepth(node.children.get(a)));
-	    }
-	    return depth + 1;
+	    	for (int a = 0; a < node.children.size(); a++) {
+	    		depth = Math.max(depth, getMaxDepth(node.children.get(a)));
+		}
+	    	return ++depth;
 	}
 
 	public String[] classify2(DecTreeNode root) {
@@ -263,8 +264,10 @@ public class DecisionTree {
 	}
 	private double determineAccuracy(List<Instance> set, String[] results) {
 		int correct = 0, total = set.size();
-		for(int i = 0; i < total; i ++) {
-			if(set.get(i).label.equals(results[i])) { correct ++; }
+		for(int i = 0; i < total; i++) {
+			if(set.get(i).label.equals(results[i])) {
+				correct++; 
+			}
 		}
 		return (double) correct/total; 
 	}
@@ -286,29 +289,28 @@ public class DecisionTree {
 
 	private String traverse(DecTreeNode node, Instance instance) {
 	
-		if(node.terminal) { return node.label; }
-		else {
-		
-		boolean found = false;
-		int indexOfAttr = 0;
-		for(int y = 0; (y < this.test.attr_name.length) && !found; y++) { //find index of Attribute
-			if(this.test.attr_name[y].equals(node.attribute)) {
-				found = true;
-				indexOfAttr = y;
-			}
-		}
-		
-		found = false;
-		DecTreeNode nextNode = new DecTreeNode(null, null, null, false);
-		for(int y = 0; (y < node.children.size()) && !found; y++) {
-			if(node.children.get(y).parentAttributeValue.equals(instance.attributes.get(indexOfAttr))) {
-				found = true;
-				nextNode = node.children.get(y);
-			}
-		}
-		
-			return traverse(nextNode, instance);
+		if(node.terminal) {
+			return node.label; 
+		} else {
 			
+			boolean found = false;
+			int indexOfAttr = 0;
+			for(int y = 0; (y < this.test.attr_name.length) && !found; y++) { //find index of Attribute
+				if(this.test.attr_name[y].equals(node.attribute)) {
+					found = true;
+					indexOfAttr = y;
+				}
+			}
+			
+			found = false;
+			DecTreeNode nextNode = new DecTreeNode(null, null, null, false);
+			for(int y = 0; (y < node.children.size()) && !found; y++) {
+				if(node.children.get(y).parentAttributeValue.equals(instance.attributes.get(indexOfAttr))) {
+					found = true;
+					nextNode = node.children.get(y);
+				}
+			}
+			return traverse(nextNode, instance);
 		}
 		
 	}
@@ -355,7 +357,6 @@ public class DecisionTree {
 				}
 			}
 		}
-	
 		return hYX;
 		
 	}
@@ -384,16 +385,15 @@ public class DecisionTree {
 			}			
 			
 		}
-		
 		return index;		
 		
 	}
 	
-	
 	private List<Instance> selectInstances(List<Instance> _examples, String attr_val, int attr_idx) {
 		
 		List<Instance> newExamples = new ArrayList<Instance>();
-		for(int count = 0; count < _examples.size(); count++) { //add all examples that have specified attribute
+		for(int count = 0; count < _examples.size(); count++) {
+			//add all examples that have specified attribute
 			if(_examples.get(count).attributes.get(attr_idx).equals(attr_val)) { 
 				newExamples.add(_examples.get(count));
 			}
@@ -408,12 +408,16 @@ public class DecisionTree {
 		
 		String[] newQuestions = new String[questions.length-1];
 		if(questions[questions.length-1].equals(questions[indexOfBQ])) {
-			for(int z = 0; z < questions.length-1; z++) { newQuestions[z] = questions[z]; }
+			for(int z = 0; z < questions.length-1; z++) { 
+				newQuestions[z] = questions[z]; 
+			}
 		} else {
-		int newIndex = 0;
+			int newIndex = 0;
 			for(int h = 0; h < questions.length; h++) {
 				newQuestions[newIndex] = questions[h];
-				if(!questions[h].equals(questions[indexOfBQ])) { newIndex++; }
+				if(!questions[h].equals(questions[indexOfBQ])) {
+					newIndex++; 
+				}
 			}
 		}
 		return newQuestions;
