@@ -174,7 +174,9 @@ public class DecisionTree {
 						
 	}
 			
-	private boolean pruneNode(DecTreeNode root, DecTreeNode node, List<String> attributeList, List<Integer> attributeNum) {
+	
+	private boolean pruneNode(DecTreeNode root, DecTreeNode node, 
+		List<String> attributeList, List<Integer> attributeNum) {
 		
 		boolean allTerminal = true;
 		for(int o = 0; o < node.children.size(); o++) {
@@ -235,7 +237,7 @@ public class DecisionTree {
 		
 		do {
 			//update best accuracy
-			bestAccuracy = determineAccuracy(this.tune.instances, classify2(bestRoot));
+			bestAccuracy = determineAccuracy(this.tune.instances, classifyTune(bestRoot));
 			
 			//reset list of pruned trees
 			rtn.clear(); 
@@ -250,17 +252,17 @@ public class DecisionTree {
 			
 			//if more accurate tree exists in pruned set, update bestRoot
 			for(int z = 0; z < rtn.size(); z++) {
-				double thisAccuracy = determineAccuracy(this.tune.instances, classify2(rtn.get(z)));
+				double thisAccuracy = determineAccuracy(this.tune.instances, classifyTune(rtn.get(z)));
 			    	if(thisAccuracy > bestAccuracy) {
 					bestAccuracy = thisAccuracy;
 					bestRoot = rtn.get(z);
 					updatedRoot = true;
 				}
 			}
-			
 		} while (updatedRoot);
 		
-		root = bestRoot; //finally set best pruned root node to this.root
+		//finally set best pruned root node to this.root
+		root = bestRoot;
 	}
 	
 	/* Recursively finds the maximum depth of the constructed
@@ -274,15 +276,6 @@ public class DecisionTree {
 	    		depth = Math.max(depth, getMaxDepth(node.children.get(a)));
 		}
 	    	return ++depth;
-	}
-
-	public String[] classify2(DecTreeNode root) {
-		
-		String[] predicted = new String[this.tune.instances.size()];
-		for(int x = 0; x < this.tune.instances.size(); x ++) {
-			predicted[x] = traverse(root, this.tune.instances.get(x));
-		}
-		return predicted;
 	}
 	
 	/* Determines the accuracy of the Decision Tree by
@@ -300,16 +293,16 @@ public class DecisionTree {
 		}
 		return (double) correct/total; 
 	}
-
-	/* Evaluates the learned decision tree on a test set.
+	
+	/* Evaluates the learned decision tree on a tune set.
 	 * @return 	the label predictions for each test instance 
 	 * 		according to the order in data set list.
 	 */
-	public String[] classify() {
+	public String[] classifyTune(DecTreeNode root) {
 		
-		String[] predicted = new String[this.test.instances.size()];
-		for(int x = 0; x < this.test.instances.size(); x ++) {
-			predicted[x] = traverse(root, this.test.instances.get(x));
+		String[] predicted = new String[this.tune.instances.size()];
+		for(int x = 0; x < this.tune.instances.size(); x ++) {
+			predicted[x] = traverse(root, this.tune.instances.get(x));
 		}
 		return predicted;
 	}
