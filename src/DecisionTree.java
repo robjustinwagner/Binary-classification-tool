@@ -28,9 +28,9 @@ public class DecisionTree {
 	/* Constructor that initalizes the training, tuning, and testing
 	 * data sets for this Decision Tree instance.
 	 * 
-	 * @param train	 the training data set
-	 * @param tune	 the tuning data set
-	 * @param test	 the testing data set
+	 * @param _train	the training data set
+	 * @param _tune		the tuning data set
+	 * @param _test	 	the testing data set
 	 */
 	public DecisionTree(DataSet _train, DataSet _tune, DataSet _test) {
 		train = _train;
@@ -38,9 +38,10 @@ public class DecisionTree {
 		test = _test;
 	}
 	
-	/**
-	 * print information gain of each possible question at root node.
-	 * 
+	/* Calculate & print the Information Gain of each possible question at root node.
+	 * (see http://en.wikipedia.org/wiki/Information_gain_in_decision_trees)
+	 * IG(T,a) = H(T) - H(T|a), where H is the Information Entropy
+	 * 	(see http://en.wikipedia.org/wiki/Entropy_(information_theory) )
 	 */
 	public void printInfoGain() {
 		//Iterate through training data and tally the number of edible and poisonous labels
@@ -78,19 +79,20 @@ public class DecisionTree {
 		}
 		
 	}
-	
-	/**
-	 * Build a decision tree given only a training set.
-	 * 
-	 */
-	public void buildTree() { //initial call
+
+	// Build a decision tree given only a training set.
+	public void buildTree() {
 		buildTree(null, this.train.instances, this.train.attr_name);
 	}
 	
-	//uses majority vote to determine label
+	/* Build a Decision Tree using majority vote to determine label
+	 * @param node		the current Decision Tree node, seed with root, recurse on subtree traversal
+	 * @param examples	the list of data examples
+	 * @param questions	the list of questions asked
+	 */
 	public void buildTree(DecTreeNode node, List<Instance> examples, String[] questions) {
 
-		//Iterate through training data and tally the number of edible and poisonous labels
+		//Iterate through training data and tally the number of edible and poisonous (mushroom) labels
 		int eCount = 0, pCount = 0;
 		for(int i = 0; i < examples.size(); i++) {
 			if(examples.get(i).label.equals(this.train.labels[0])) eCount++; 
@@ -122,6 +124,7 @@ public class DecisionTree {
 			node.terminal = true;
 			return;
 		}
+		
 		// test if all examples have the same label
 		boolean allSame = true;
 		for(int w = 0; (w < examples.size()) && allSame; w++) {
@@ -129,7 +132,7 @@ public class DecisionTree {
 				allSame = false;
 			}
 		}
-		if(allSame) { //if all examples have the same label
+		if(allSame) { 
 			node.label = examples.get(0).label;
 			node.terminal = true;
 			return;
