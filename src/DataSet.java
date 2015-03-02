@@ -10,9 +10,8 @@ public class DataSet {
 
 	private List<Instance> instances = new ArrayList<Instance>(); // ordered list of instances
 
-	private String [] labels = null;  	// instance labels
-	private String [] attr_name = null; 	// attribute names
-	private String [][] attr_val = null;    // candidate values of each attribute
+	private List<String> labels = null;  	// instance labels
+	private HashMap<String, List<String>> attr_vals = null;	// candidate values of each attribute
 	
 	/* Adds an instance to the data set collection,
 	 * populating its label value and associated
@@ -44,7 +43,24 @@ public class DataSet {
 	 */
 	public void addAttribute(String line, int idx) {
 		String[] splitLine = line.split(" ");
-		attr_name[idx] = splitLine[0];
-		attr_val[idx] = splitLine[1].split(",").clone();
+		attr_name.set(idx, splitLine[0]);
+		attr_vals[idx] = Arrays.asList(splitLine[1].split(",").clone());
 	}
+	
+	public List<Instance> getInstances() {
+		return instances;
+	}
+	
+	public List<String> getLabels() {
+		return labels;
+	}
+	
+	public List<String> getAttributes() {
+		return Arrays.asList((String[])attr_vals.keySet());
+	}
+	
+	public List<String> getAttributeCandidates(String attribute) {
+		return attr_vals.get(attribute);
+	}
+	
 }
