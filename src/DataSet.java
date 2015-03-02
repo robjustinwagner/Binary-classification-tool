@@ -32,6 +32,10 @@ public class DataSet {
 		instances.add(instanceToAdd);
 	}
 	
+	public List<Instance> getInstances() {
+		return instances;
+	}
+	
 	/* Adds a specific attribute instance to the data set collection,
 	 * populating its label value and associated
 	 * attribute list.
@@ -47,20 +51,16 @@ public class DataSet {
 		attr_vals[idx] = Arrays.asList(splitLine[1].split(",").clone());
 	}
 	
-	public List<Instance> getInstances() {
-		return instances;
-	}
-	
-	public List<String> getLabels() {
-		return labels;
-	}
-	
 	public List<String> getAttributes() {
 		return Arrays.asList((String[])attr_vals.keySet());
 	}
 	
 	public List<String> getAttributeCandidates(String attribute) {
 		return attr_vals.get(attribute);
+	}
+	
+	public List<String> getLabels() {
+		return labels;
 	}
 	
 }
