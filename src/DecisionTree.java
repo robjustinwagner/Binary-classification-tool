@@ -124,7 +124,6 @@ public class DecisionTree {
 			node.terminal = true;
 			return;
 		}
-		
 		// test if all examples have the same label
 		boolean allSame = true;
 		for(int w = 0; (w < examples.size()) && allSame; w++) {
@@ -132,19 +131,26 @@ public class DecisionTree {
 				allSame = false;
 			}
 		}
+		//if all examples have the same label
 		if(allSame) { 
 			node.label = examples.get(0).label;
 			node.terminal = true;
 			return;
 		}
-		if(questions.length == 0) { //if no more questions
+		//if no more questions exist
+		if(questions.length == 0) {
 			node.label = majorityLabel;
 			node.terminal = true;
 			return;
 		}	
-		int indexOfBQ = findBestQuestion(questions, hY, majorityLabel, examples); //find best question index
-		if(node == null) { //initial case (root)
-			this.root = new DecTreeNode(null, questions[indexOfBQ], "ROOT", false); //construct root node
+		
+		//find index of best question
+		int indexOfBQ = findBestQuestion(questions, hY, majorityLabel, examples);
+		
+		//initial case (root)
+		if(node == null) {
+			//construct root node & build tree
+			this.root = new DecTreeNode(null, questions[indexOfBQ], "ROOT", false); 
 			buildTree(root, examples, questions);					
 		} else {
 			node.attribute = questions[indexOfBQ];
@@ -156,10 +162,13 @@ public class DecisionTree {
 					newIndex = g;
 				}
 			}
-			for(int j = 0; j < this.train.attr_val[newIndex].length; j++) { //iterate over possible answers to best question
+			//iterate over possible answers to best question
+			for(int j = 0; j < this.train.attr_val[newIndex].length; j++) { 
 				DecTreeNode newNode = new DecTreeNode(null, null, this.train.attr_val[newIndex][j], false);
 				node.addChild(newNode);
-				buildTree(newNode, selectInstances(examples, this.train.attr_val[newIndex][j], indexOfBQ), eliminateQuestion(questions, indexOfBQ));
+				buildTree(newNode, selectInstances(examples, 
+					this.train.attr_val[newIndex][j], indexOfBQ),
+					eliminateQuestion(questions, indexOfBQ));
 			}
 		}
 						
@@ -183,7 +192,6 @@ public class DecisionTree {
 		}
 			
 		if(allTerminal) {
-			
 			node.terminal = true;
 			List<Instance> ins = new ArrayList<Instance>();
 			for(int g = 0; g < this.train.instances.size(); g++) {
@@ -215,24 +223,30 @@ public class DecisionTree {
 		return false;		
 	}
 	
-
-	/**
-	 * Build a decision tree given a training set then prune it using a tuning set.
-	 * 
-	 */
+	/* Build a decision tree given a training set, then prune it using a tuning set. */
 	public void buildPrunedTree() {
 
-		this.buildTree(); //initial build of tree using training set
+		//initial build of tree using training set
+		this.buildTree(); 
+		
 		DecTreeNode bestRoot = new DecTreeNode(root);
 		double bestAccuracy = 0.0;
 		boolean updatedRoot = false;
+		
 		do {
-			bestAccuracy = determineAccuracy(this.tune.instances, classify2(bestRoot)); //update best accuracy
-			rtn.clear(); //reset list of pruned trees
-			updatedRoot = false; //reset status that root has been updated
+			//update best accuracy
+			bestAccuracy = determineAccuracy(this.tune.instances, classify2(bestRoot));
+			
+			//reset list of pruned trees
+			rtn.clear(); 
+			
+			//reset status that root has been updated
+			updatedRoot = false; 
 			
 			DecTreeNode tmp = new DecTreeNode(bestRoot);
-			pruneNode(tmp, tmp, new ArrayList<String>(), new ArrayList<Integer>()); //add pruned list of trees to rtn
+			
+			//add pruned list of trees to rtn
+			pruneNode(tmp, tmp, new ArrayList<String>(), new ArrayList<Integer>()); 
 			
 			//if more accurate tree exists in pruned set, update bestRoot
 			for(int z = 0; z < rtn.size(); z++) {
@@ -249,6 +263,11 @@ public class DecisionTree {
 		root = bestRoot; //finally set best pruned root node to this.root
 	}
 	
+	/* Recursively finds the maximum depth of the constructed
+	 * Decision Tree using DFS.
+	 * @param node	the node used to recursively traverse the Decision Tree, seed with root
+	 * @return 	the maximum depth of the constructed Decision Tree
+	 */
 	private int getMaxDepth(DecTreeNode node) {
 		int depth = 0;
 	    	for (int a = 0; a < node.children.size(); a++) {
@@ -265,6 +284,13 @@ public class DecisionTree {
 		}
 		return predicted;
 	}
+	
+	/* Determines the accuracy of the Decision Tree by
+	 * comparing it against the test set.
+	 * @param set
+	 * @param results
+	 * @return 		accuracy; a double as a percentage of correct vs total
+	 */
 	private double determineAccuracy(List<Instance> set, String[] results) {
 		int correct = 0, total = set.size();
 		for(int i = 0; i < total; i++) {
@@ -275,12 +301,10 @@ public class DecisionTree {
 		return (double) correct/total; 
 	}
 
-	
-  /**
-   * Evaluates the learned decision tree on a test set.
-   * @return the label predictions for each test instance 
-   * 	according to the order in data set list
-   */
+	/* Evaluates the learned decision tree on a test set.
+	 * @return 	the label predictions for each test instance 
+	 * 		according to the order in data set list.
+	 */
 	public String[] classify() {
 		
 		String[] predicted = new String[this.test.instances.size()];
@@ -295,7 +319,6 @@ public class DecisionTree {
 		if(node.terminal) {
 			return node.label; 
 		} else {
-			
 			boolean found = false;
 			int indexOfAttr = 0;
 			for(int y = 0; (y < this.test.attr_name.length) && !found; y++) { //find index of Attribute
@@ -322,8 +345,8 @@ public class DecisionTree {
 		root.print(0);
 	}
 	
-	
-	private double findhYX(int indexOfAttributeInTrain, int indexOfAttributeInExamples, String majorityLabel, List<Instance> examples) {
+	private double findhYX(int indexOfAttributeInTrain, int indexOfAttributeInExamples, 
+		String majorityLabel, List<Instance> examples) {
 		
 		//calculate H(Y|X) for given attribute
 		int numValOfAttr = this.train.attr_val[indexOfAttributeInTrain].length;
@@ -401,7 +424,6 @@ public class DecisionTree {
 				newExamples.add(_examples.get(count));
 			}
 		}
-		
 		return newExamples;
 		
 	}
@@ -424,6 +446,7 @@ public class DecisionTree {
 			}
 		}
 		return newQuestions;
+		
 	}
 	
 }
